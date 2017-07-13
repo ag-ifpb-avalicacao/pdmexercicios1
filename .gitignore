@@ -60,3 +60,7 @@ target/
 
 # Config server heroku
 questao_05v2/questao_05_server_heroku/src/main/webapp/WEB-INF/web.xml
+
+# Allow apk folder
+!apks/*
+apks/.DS_Store
