@@ -1,0 +1,32 @@
+version: '2'
+services:
+
+  # SERVICOS DO CLIENTE
+  postgres-server:
+    container_name: message-server-postgres
+    image: natarajan/db-message
+    build: ./postgres
+    ports:
+     - "5434:5432"
+    expose:
+     - 5434
+    volumes:
+     - postgres-volume-message:/var/lib/postgresql/data/
+  web-server:
+    container_name: message-server-ws
+    build: .
+    image: natarajan/message-server
+    ports:
+     - "8081:8080"
+     - "4949:4848"
+    links:
+     - "postgres-server:docker-postgres"
+
+networks:
+  default:
+    external:
+      name: cliente_default_ntw
+volumes:
+    postgres-volume-message:
+      driver: local
+    
