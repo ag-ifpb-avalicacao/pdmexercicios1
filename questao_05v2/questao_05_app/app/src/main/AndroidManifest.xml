@@ -25,9 +25,6 @@
         </activity>
         <activity android:name=".presentation.ChatActivity"></activity>
 
-        <!--<activity android:name=".presentation.ChatActivityPerson1"></activity>-->
-        <!--<activity android:name=".presentation.ChatActivityPerson2"></activity>-->
-
         <service android:name=".service.MessageService"
             android:exported="false" />
 
