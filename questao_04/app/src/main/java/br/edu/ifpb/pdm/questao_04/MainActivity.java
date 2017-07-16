@@ -85,17 +85,17 @@ public class MainActivity extends AppCompatActivity {
     private void updateDownloadList() {
 
         ArrayAdapter<File> adapter = (ArrayAdapter<File>) listView.getAdapter();
-
+        // obtem os arquivos salvos na pasta
         File directory = new File(Environment.getExternalStorageDirectory()
                 + "/questao_04/");
 
+        // limpa o adapter do listview e insire os arquivos atuais na pasta
         adapter.clear();
-
         File[] files = directory.listFiles();
         if (files != null)
             adapter.addAll(files);
 
-        adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged(); // nofifica o adapter para atualizar o listview
 
     }
 
@@ -117,20 +117,20 @@ public class MainActivity extends AppCompatActivity {
 
     // método que apaga os downloads já realizados
     private void eraseDownloads() {
-
+        // pega referência ao adapter que manipula a listView
         ArrayAdapter<File> adapter = (ArrayAdapter<File>) listView.getAdapter();
-
+        // pega referência aos arquivos salvos na pasta do aplicativo e os exclui.
         File dir = new File(Environment.getExternalStorageDirectory()
                 + "/questao_04/");
-
         if (dir.isDirectory()) {
             String[] children = dir.list();
             for (int i = 0; i < children.length; i++) {
                 new File(dir, children[i]).delete();
             }
         }
+        // limpa a listview
         adapter.clear();
-        adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged(); // nofifica o adapter para atualizar o listview
 
     }
 
