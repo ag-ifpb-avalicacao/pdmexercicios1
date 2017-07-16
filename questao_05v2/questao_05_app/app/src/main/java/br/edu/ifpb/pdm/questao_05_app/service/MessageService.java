@@ -27,7 +27,7 @@ public class MessageService extends IntentService {
 
 //    public static final String URL_MESSAGE_API = "http://10.0.3.2:8081/message-server/api/";    //para uso com a versão server docker
     public static final String URL_MESSAGE_API = "https://pdmmessages.herokuapp.com/api/";    //para uso com a versão server online
-    private static Retrofit retrofit = null;
+    private static Retrofit retrofit;
 
     public MessageService() {
         super("MessageService");
