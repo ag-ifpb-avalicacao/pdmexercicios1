@@ -6,9 +6,25 @@
 
 
 <hr/>
+### Questão 05
+
+Pesquise e construa um aplicativo que possibilite a conversa entre duas pessoas usando um servidor para receber, armazenar e entregar as mensagens quando lhe for solicitado.
+
+![Telas](https://github.com/natarajanrodrigues/pdmexercicios1/blob/master/questao_05/tela.png)
 
 
-#### ROTEIRO PARA IMPLANTAR O SERVIDOR DAS MENSAGENS
+<hr/>
+
+**Observação 1**: um dos APKs foi gerado para rodar em Genymotion - cuja máquina virtual considera o ip do localhost como sendo 10.0.3.2.
+
+Por isso as chamadas do IntentService no aplicativo são direcionadas para esse endereço.
+
+**Observação 2**:
+Há também uma versão do APK que faz consulta a um servidor na web;
+
+<hr/>
+
+#### Roteiro para implantar o servidor das mensages pelo Docker
 
 
 1. Certifique-se que o seu serviço **Docker** esteja iniciado.
@@ -24,9 +40,3 @@
   \*\* Os scripts `run.sh` e `stop.sh` são válidos para sistemas unix-like.
 
   Os passos acima devem ser suficientes para iniciar os containers com serviço restful, bem como aqueles responsáveis pela persistência.
-
-
-
-**Observação**: o aplicativo Android foi gerado para rodar em Genymotion - cuja máquina virtual considera o ip do localhost como sendo 10.0.3.2.
-
-Por isso as chamadas do IntentService no aplicativo são direcionadas para esse endereço.
