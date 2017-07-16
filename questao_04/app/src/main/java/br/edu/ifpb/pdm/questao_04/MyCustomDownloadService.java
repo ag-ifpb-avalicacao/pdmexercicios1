@@ -92,10 +92,10 @@ public class MyCustomDownloadService extends IntentService {
                 }
 
                 // imprimindo para efeito de log.
-                System.out.println("Content-Type = " + contentType);
-                System.out.println("Content-Disposition = " + disposition);
-                System.out.println("Content-Length = " + contentLength);
-                System.out.println("fileName = " + fileName);
+                Log.d("[MyDebug]","Content-Type = " + contentType);
+                Log.d("[MyDebug]","Content-Disposition = " + disposition);
+                Log.d("[MyDebug]","Content-Length = " + contentLength);
+                Log.d("[MyDebug]","fileName = " + fileName);
 
                 // criando o arquivo na pasta de downloads
 

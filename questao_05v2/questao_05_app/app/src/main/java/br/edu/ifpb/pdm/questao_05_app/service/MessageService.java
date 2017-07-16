@@ -21,7 +21,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 /*
- * IntentService que realiza a consulta
+ * IntentService que realiza comunicação com o servidor de mensagens
  */
 public class MessageService extends IntentService {
 
@@ -45,8 +45,7 @@ public class MessageService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
 
-
-        //
+        // recupera informação vinda na intent que diz qual comando executar
         String command = intent.getStringExtra("command");
 
         //usando a biblioteca Retrofit para iniciar um client rest simples
@@ -55,17 +54,22 @@ public class MessageService extends IntentService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        MessageRestApiService apiService = retrofit.create(MessageRestApiService.class);
+        MessageRestApiService apiService = retrofit.create(MessageRestApiService.class);    // cria apiService Retrofit
+        //cria localBroadcast para enviar resultados da execução do serviço
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
 
         switch (command) {
-            //
+            // comando ler mensagens
             case "GET": {
                 String id = intent.getStringExtra("id");
-                Call<List<MyChatMessage>> call = apiService.getMessagesAfter(id);
+                Call<List<MyChatMessage>> call = apiService.getMessagesAfter(id);   // prepara chamada à api
                 try {
-                    List<MyChatMessage> messages = call.execute().body();
+                    List<MyChatMessage> messages = call.execute().body();   // executa o GET
+
+                    // se houver resultados envia pelo local broacast manager
                     if (messages != null && messages.size() > 0) {
+
+                        // intent que identifica o tratamento que a activity deve dar ao receber esse resultado
                         Intent intentResponse = new Intent("br.edu.ifpb.server.NEW_MESSAGES");
 
                         intentResponse.putExtra("messages", (Serializable) messages);
@@ -74,30 +78,34 @@ public class MessageService extends IntentService {
 
                 } catch (IOException e) {
                     e.printStackTrace();
-                    manager.sendBroadcast(new Intent("br.edu.ifpb.server.ERRO"));
+                    manager.sendBroadcast(new Intent("br.edu.ifpb.server.ERRO")); //envia mensagem se houve erro
                 }
             } break;
 
-            //
+            // comando salvar mensagem
             case "POST": {
                 MyChatMessage message = (MyChatMessage) intent.getSerializableExtra("message");
-                Call<MyChatMessage> call = apiService.saveMessage(message);
+                Call<MyChatMessage> call = apiService.saveMessage(message); // prepara chamada à api
 
                 try {
-                    Response<MyChatMessage> responseCall = call.execute();
+                    Response<MyChatMessage> responseCall = call.execute();  // chamando o POST
 
+                    // se a mensagem foi devidamente salva/criada
                     if (responseCall.code() == 201) {
 
                         MyChatMessage messageSaved = responseCall.body();
                         Intent intentResponse = new Intent("br.edu.ifpb.server.SAVED");
                         intentResponse.putExtra("saved", (Serializable) messageSaved);
-                        manager.sendBroadcast(intentResponse);
+                        manager.sendBroadcast(intentResponse);  // informa à activity
 
+                    } else {
+                        // manda mensagem de erro se a menasgem não salva
+                        manager.sendBroadcast(new Intent("br.edu.ifpb.server.ERRO"));
                     }
 
                 } catch (IOException e) {
                     e.printStackTrace();
-                    manager.sendBroadcast(new Intent("br.edu.ifpb.server.ERRO"));
+                    manager.sendBroadcast(new Intent("br.edu.ifpb.server.ERRO")); //envia mensagem se houve erro
                 }
             } break;
 

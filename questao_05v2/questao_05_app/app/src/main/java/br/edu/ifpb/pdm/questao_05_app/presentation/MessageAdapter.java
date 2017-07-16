@@ -73,6 +73,7 @@ public class MessageAdapter extends ArrayAdapter<MyChatMessage> {
         // para a Pessoa 1 ou 2
         boolean isPerson1 = contextActivity.getIntent().getBooleanExtra("isPerson1", true);
 
+
         // setando o layout dos balões dependendo da pessoa que vai ver as mensagens
         if (chatMessage.isPerson1() == isPerson1) {
             layoutResource = R.layout.chat_message_layout_left;

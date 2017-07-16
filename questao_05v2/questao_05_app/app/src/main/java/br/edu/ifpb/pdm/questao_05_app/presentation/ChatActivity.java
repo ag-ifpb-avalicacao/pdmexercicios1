@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,12 +19,20 @@ import android.widget.Toast;
 
 import com.github.ivbaranov.mli.MaterialLetterIcon;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import br.edu.ifpb.pdm.questao_05_app.R;
 import br.edu.ifpb.pdm.questao_05_app.model.MyChatMessage;
+import br.edu.ifpb.pdm.questao_05_app.service.LocalFileUtils;
 import br.edu.ifpb.pdm.questao_05_app.service.MessageService;
 
 /**
@@ -37,36 +46,31 @@ public class ChatActivity extends AppCompatActivity {
     private ListView messagesListView;      // widget que engloba as mensagens
     private List<MyChatMessage> messages;   // lista de mensagens
     private MessageAdapter adapter;         // adapter para usar no ListView
-    private Bundle mySavedInstanceState;    // Bundle para salvar estados em processo de transição no ciclo de vida
     private boolean isPerson1;              // boolean que guarda a informação se é a pessoa 1 ou 2 (vindo do Intent)
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //guarda Bundle
-        mySavedInstanceState = savedInstanceState;
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat2);
 
+        // pegando informação se é pessoa 1 ou 2 (pelos intent)
+        this.isPerson1 = getIntent().getBooleanExtra("isPerson1", true);
 
         // pegando componentes
         messageEditText = (EditText) findViewById(R.id.editText);
-//        sendButton = (Button) findViewById(R.id.button3);
         sendButton = (ImageButton) findViewById(R.id.button3);
         messagesListView = (ListView) findViewById(R.id.messagesListView);
 
 
-        // pegando informação se é pessoa 1 ou 2 (pelos intent)
-        this.isPerson1 = getIntent().getBooleanExtra("isPerson1", true);
-
-        // chama setting Toolbar
+        // setando a Toolbar (que contém o icone e nome da Pessoa1/Pessoa2)
         setToolbar();
 
         // setando ListView das mensagens
         messages = new ArrayList<>();
         adapter = new MessageAdapter(this, R.layout.chat_message_layout_left, messages);
         messagesListView.setAdapter(adapter);
+
 
         // setando listener de clique no botão de enviar mensagem
         sendButton.setOnClickListener(new Button.OnClickListener() {
@@ -88,7 +92,6 @@ public class ChatActivity extends AppCompatActivity {
                 messageEditText.setText("");
                 MyChatMessage saved = (MyChatMessage) intent.getSerializableExtra("saved");
                 adapter.add(saved);
-
                 adapter.notifyDataSetChanged();
                 messagesListView.setSelection(adapter.getCount());
             }
@@ -98,17 +101,14 @@ public class ChatActivity extends AppCompatActivity {
         localBroadcastManager.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                messageEditText.setText("");
-                List<MyChatMessage> news = (List<MyChatMessage>) intent.getSerializableExtra("messages");
-                adapter.addAll(news);
 
-                adapter.notifyDataSetChanged();
-                messagesListView.setSelection(adapter.getCount());
+                List<MyChatMessage> news = (List<MyChatMessage>) intent.getSerializableExtra("messages");
+                loadMessagesOnListView(news);
 
             }
         }, new IntentFilter("br.edu.ifpb.server.NEW_MESSAGES"));
 
-        //
+        // mostra mensagem de erro de conexão com o servidor
         localBroadcastManager.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -120,15 +120,26 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    /*
+        método responsável por carregar mensagens para a listView
+     */
+    private void loadMessagesOnListView(List<MyChatMessage> messages) {
+        this.adapter.addAll(messages);
+        this.messagesListView.setSelection(adapter.getCount());
+        this.adapter.notifyDataSetChanged();
+        messagesListView.smoothScrollByOffset(messages.size());
+    }
+
     // Setando a toolbar
     private void setToolbar() {
 
-        Toolbar toolBar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolBar = (Toolbar) findViewById(R.id.toolbar); //a toolbar personalizada da activity
         setSupportActionBar(toolBar);
 
-        MaterialLetterIcon mli = (MaterialLetterIcon) findViewById(R.id.letterIcon);
-        TextView toolbarTextView = (TextView) findViewById(R.id.toolbarText);
+        MaterialLetterIcon mli = (MaterialLetterIcon) findViewById(R.id.letterIcon);    // o icone com as iniciais da pessoa
+        TextView toolbarTextView = (TextView) findViewById(R.id.toolbarText);       // o nome da pessoa
 
+        //setando
         String toolbarText;
         if (isPerson1()) {
             toolbarText = "Pessoa 1";
@@ -143,15 +154,19 @@ public class ChatActivity extends AppCompatActivity {
     /*
      * Método para pegar as mensagens no servidor
      */
-    private void updateMessages() {
+    private void getNewMessages() {
 
-        int totalMessages = 0;
-        totalMessages = messages.size();
+        long lastMessageId = 0;
+        // se houver mensagens no adapter, pega o id da última mensagem
+        if (messages != null && messages.size() > 0) {
+            MyChatMessage myChatMessage = messages.get(messages.size() - 1);
+            lastMessageId = myChatMessage.getId();
+        }
 
+        // manda buscar pelas mensagens que chegaram e tem id > lastMessageId
         Intent intent = new Intent(this, MessageService.class);
         intent.putExtra("command", "GET");
-        intent.putExtra("id", Integer.toString(totalMessages));
-//        boolean isPerson1 = getIntent().getBooleanExtra("isPerson1", true);
+        intent.putExtra("id", Long.toString(lastMessageId));
         startService(intent);
 
     }
@@ -161,53 +176,58 @@ public class ChatActivity extends AppCompatActivity {
      * Método para enviar mensagem ao servidor
      */
     private void sendMessage() {
-        String messageText = messageEditText.getText().toString();
+        String messageText = messageEditText.getText().toString();  // pega a mensagem no editText
 
-        Intent intent = new Intent(this, MessageService.class);
-        intent.putExtra("command", "POST");
-
-        boolean isPerson1 = getIntent().getBooleanExtra("isPerson1", true);
-
-        intent.putExtra("message", new MyChatMessage(messageText, isPerson1));
-        startService(intent);
-    }
-
-    //métodos para guardar informações da tela entre reativações da tela
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putSerializable("messages", (Serializable) adapter.getMessages());
-    }
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-
-        if (savedInstanceState != null) {
-            List<MyChatMessage> messages = (List<MyChatMessage>) savedInstanceState.getSerializable("messages");
-            adapter.addAll(messages);
+        if (messageText != null && !messageText.trim().equals("")) {    // só permite enviar a mensagem se for válida
+            messageEditText.setText("");
+            // chama IntentService para salvar a mensagem no servidor
+            Intent intent = new Intent(this, MessageService.class);
+            intent.putExtra("command", "POST");     // tipo da operação
+            intent.putExtra("message", new MyChatMessage(messageText, isPerson1()));    // mensagem
+            startService(intent);   // chama o MessageService
+        } else {
+            // se não há mensagem válida mostra mensagem de erro
+            Toast.makeText(getApplicationContext(), "Insira uma mensagem", Toast.LENGTH_LONG).show();
         }
-
-        super.onRestoreInstanceState(savedInstanceState);
     }
+
 
     @Override
     protected void onResume() {
-        updateMessages();   // quando a tela é chamada novamente, chama método para buscar novas mensagens no servidor
         super.onResume();
+        /*
+            tenta recuperar as mensagens já baixadas e salvas em arquivo no celular
+         */
+        List<MyChatMessage> savedMessages = LocalFileUtils.readMessagesFile(isPerson1());
+        if (savedMessages != null)  // se houver mensagens salvas, carrega na listview
+            loadMessagesOnListView(savedMessages);
+
+        /*
+             chama método para buscar novas mensagens no servidor. Como é executado assincronamente,
+             a activity é iniciada com as mensagens salvas e quando chegam as novas mensagens a tela
+             é atualizada
+        */
+        getNewMessages();
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        /*
+            salva as mensagens atuais no mensagens atuais em arquivo, para serem posteriormente recuperadas
+            evitando ter que buscar todas novamente
+         */
+        LocalFileUtils.saveMessagesOnFile(adapter.getMessages(), isPerson1());
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
+    /*
+        método usado para devolver o boolean que informa se a activity criada é de Pessoa1 ou Pessoa2
+        true = Pessoa1
+        false = Pessoa2
+     */
     public boolean isPerson1() {
-        return isPerson1;
+        return this.isPerson1;
     }
-
 
 }

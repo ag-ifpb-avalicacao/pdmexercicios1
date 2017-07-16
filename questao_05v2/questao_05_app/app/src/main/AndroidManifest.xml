@@ -3,6 +3,10 @@
     package="br.edu.ifpb.pdm.questao_05_app">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+
     <!--"@style/AppTheme">-->
     <application
 
@@ -20,6 +24,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".presentation.ChatActivity"></activity>
+
+        <!--<activity android:name=".presentation.ChatActivityPerson1"></activity>-->
+        <!--<activity android:name=".presentation.ChatActivityPerson2"></activity>-->
 
         <service android:name=".service.MessageService"
             android:exported="false" />
