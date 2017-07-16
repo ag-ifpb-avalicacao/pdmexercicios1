@@ -16,12 +16,12 @@ Pesquise e construa um aplicativo que possibilite a conversa entre duas pessoas 
 
 <hr/>
 
-**Observação 1**: um dos APKs foi gerado para rodar em Genymotion - cuja máquina virtual considera o ip do localhost como sendo 10.0.3.2.
+**Observações sobre a resposta**:
+- há duas pasta que representam a implmentação do servidor. Uma para rodar no docker e outra que o que foi disponibilizado na web
 
-Por isso as chamadas do IntentService no aplicativo são direcionadas para esse endereço.
+- um dos arquivos APKs foi gerado para rodar em Genymotion - cuja máquina virtual considera o ip do localhost como sendo 10.0.3.2
 
-**Observação 2**:
-Há também uma versão do APK que faz consulta a um servidor na web;
+- Ver pasta de APKs sobre versões do aplicativo
 
 <hr/>
 
