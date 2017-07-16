@@ -1,15 +1,14 @@
 
+### Questão 01
 
-Descrição da questão:
-
-** 1) Construa um aplicativo android qualquer que adote, pelo menos: **
+Construa um aplicativo android qualquer que adote, pelo menos:
 
     - quatro tipos diferentes de layouts, dentre eles, obrigatoriamente, TableLayout e AbsoluteLayout;
     - cinco tipos diferentes de widgets, dentre eles, obrigatoriamente, ListView;
     - duas telas diferentes
     - navegação explícita entre as telas
 
-**RESPOSTA**
+**Observações sobre a resposta**
 
 - Layouts utilizados:
 
