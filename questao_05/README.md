@@ -41,3 +41,6 @@ Pesquise e construa um aplicativo que possibilite a conversa entre duas pessoas 
   \*\* Os scripts `run.sh` e `stop.sh` são válidos para sistemas unix-like.
 
   Os passos acima devem ser suficientes para iniciar os containers com serviço restful, bem como aqueles responsáveis pela persistência.
+  
+6. Link para servidor no Heroku: https://pdmmessages.herokuapp.com/
+
